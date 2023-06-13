@@ -11,9 +11,12 @@
 /*----------------------------------------------------------------------------*/
 #include <Arduino.h>
 
+/*Arduino Libraries*/
 #include <SPI.h>
 #include <SD.h>
+#include <Wire.h>
 //#include <LiquidCrystal_I2C.h> 
+
 
 /*----------------------------------------------------------------------------*/
 /*------------------------------- Global -------------------------------------*/
@@ -21,6 +24,7 @@
 
 /* Texas Inst. I2C address is 0x27 NXP Semi. I2C address is 0x3F */
 //#define i2c_address 0x3F 
+
 //LiquidCrystal_I2C lcd(i2c_address,16,2);
 
 String SD_fileName="scan_001.txt";             //Name of the saved file on the SD card
@@ -67,7 +71,12 @@ bool isScanning = 0;                        //if push button is pressed toggle t
 bool isFinished = 0;                        //if scan is finished ( reached max height) set this flag to 1
 
 
-
+/*----------------------------------------------------------------------------*/
+/*------------------------- Function Prototypes ------------------------------*/
+/*----------------------------------------------------------------------------*/
+double getCoordXY();
+float mapFloat(float fval, float val_in_min, float val_in_max, float val_out_min, float val_out_max);
+void write_to_SD(float SDx, float SDy, float SDz);
 
 void setup() 
 {
@@ -86,11 +95,7 @@ void setup()
   #define stepperZ_dir  5
   #define stepperZ_step 4
 
-
-  /*-- Calculating Variables --*/
-  RADIANS = (3.141592 / 180.0) * (360/steps_per_rotation_for_motor);              //1.8 degrees
-  steps_z_height = (z_layer_height * steps_per_rotation_for_motor * lead_screw_rotations_per_cm)/10;
-
+  /*--- Pin Mode ---*/
   pinMode(IR_SHARP, INPUT);
   pinMode(pushButton, INPUT);
 
@@ -102,6 +107,9 @@ void setup()
 
   SD.begin(SD_ChipSelect);
 
+  /*-- Calculating Variables --*/
+  RADIANS = (3.141592 / 180.0) * (360/steps_per_rotation_for_motor);              //1.8 degrees
+  steps_z_height = (z_layer_height * steps_per_rotation_for_motor * lead_screw_rotations_per_cm)/10;
 
 }
 
@@ -209,6 +217,8 @@ double getCoordXY()
   Serial.print(y); Serial.print("   "); 
   Serial.print(z); Serial.print("   "); 
   Serial.print(angle); Serial.println("   "); */
+
+  return 0;
 }
 
 

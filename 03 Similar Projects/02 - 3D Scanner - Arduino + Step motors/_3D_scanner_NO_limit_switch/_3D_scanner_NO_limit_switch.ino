@@ -188,7 +188,6 @@ double getDistance()
 }
 
 
-
 //Function that maps the value in a float format
 float mapFloat(float fval, float val_in_min, float val_in_max, float val_out_min, float val_out_max)
 {
