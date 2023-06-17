@@ -5,7 +5,7 @@
 
 File myFile;
 
-int pinCS = 10; // pin 10 on arduino nano
+int pinCS = 4; // pin 4 on arduino UNO
 
 void setup()
 {
@@ -24,7 +24,7 @@ void setup()
   }
 
   // create/open file
-  myFile = SD.open("test.text", FILE_WRITE);
+  myFile = SD.open("test.txt", FILE_WRITE);
 
   // if file is opened okay
   if (myFile)
