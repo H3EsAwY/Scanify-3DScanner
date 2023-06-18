@@ -10,9 +10,9 @@ void setup()
 
 void loop()
 {
-  int sensorValue = analogRead(irPin);        // read the analog value from the IR sensor
-  float voltage = sensorValue * 5.0 / 1023.0; // convert analog value to voltage
-  distance = 26.2 * pow(voltage, -1.15);      // calculate the distance in cm using the formula provided by Sharp datasheet
+  int sensorValue = analogRead(irPin);   // read the analog value from the IR sensor
+  float voltage = 3 * 5.0 / 1023.0;      // convert analog value to voltage
+  distance = 26.2 * pow(voltage, -1.15); // calculate the distance in cm using the formula provided by Sharp datasheet
   Serial.print("Distance: ");
   Serial.print(distance);
   Serial.println(" cm");
