@@ -1,2 +1,2 @@
-# 3DScanner
-Project 1
+# Scanify - 3DScanner 
+MTE 2024 Project 1
