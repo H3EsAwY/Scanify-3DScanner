@@ -30,17 +30,17 @@ String SD_fileName = "scan_001.txt"; // Name of the saved file on the SD card
 /*---------------- Calibration and Tweaks ----------------*/
 
 /*-- Scan Resolution --*/
-int IR_scans_number = 40;   // Amount of scans for each point. The mean is then calculated. This would increase the delay for each scan, but increase accuracy.
+int IR_scans_number = 15;   // Amount of scans for each point. The mean is then calculated. This would increase the delay for each scan, but increase accuracy.
 float z_layer_height = 0.5; // in mm           //Layer height. The amount of mm for each layer.
-
 /*-- Stepper Motor Parameters --*/
-int step_delay = 3000;                  // in us                //Delay for each step for the stepper motor in microseconds
-int steps_per_rotation_for_motor = 200; // Steps that the motor needs for a full rotation.
+int step_delay = 47 ;                  // in us                //Delay for each step for the stepper motor in microseconds
+int steps_per_rotation_for_motor = 6400; // Steps that the motor needs for a full rotation 200/(1/32).
 
 /*-- Physical Design Specific --*/
-int lead_screw_rotations_per_cm = 8; // How many rotations needs the lead screw to make in order to make 1cm.
-int z_axis_height = 12;              // in cm               //Maximum height of the scanned file
-int distance_to_center = 19;         // In cm. Distance from sensor to the turntable center in cm
+int lead_screw_rotations_per_cm = 8; // Lead = NumStarts * Pitch How many rotations needs the lead screw to make in order to make 1cm.
+int z_axis_max_height = 8;              // in cm               //Maximum height of the scanned file
+
+int distance_to_center = 18;         // In cm. Distance from sensor to the turntable center in cm
 
 /*----------------------- Variables -----------------------*/
 File fileContent;
@@ -53,6 +53,7 @@ float z = 0;        // z Coordinate of the measured point
 
 int z_loop = 0; // variable used for the z-axis motor rotation
 int r_loop = 0; // variable used for the turntable motor rotation
+float currentSteps_Z = 0;
 
 float measured_analog = 0; // Analog read from the distance sensor
 float analog = 0;          // Analog MEAN
@@ -62,12 +63,14 @@ float RADIANS = 0.0;    // Minimum Rotation Angle (stepper resolution) in Rad (1
 int steps_z_height = 0; // Variable used for the amount of steps in z-axis
 
 /*---- Flags ----*/
-bool isScanning = 0; // if push button is pressed toggle this flag
+bool isScanning = 1; // if push button is pressed toggle this flag
 bool isFinished = 0; // if scan is finished ( reached max height) set this flag to 1
 
 /*----------------------------------------------------------------------------*/
 /*------------------------- Function Prototypes ------------------------------*/
 /*----------------------------------------------------------------------------*/
+
+void rotateStepper();
 double getCoordXY();
 float mapFloat(float fval, float val_in_min, float val_in_max, float val_out_min, float val_out_max);
 void write_to_SD(float SDx, float SDy, float SDz);
@@ -81,12 +84,12 @@ void setup()
 #define pushButton 7
 
 // Rotating Stepper (Turntable Stepper) Driver Pins
-#define stepperRot_dir 3
-#define stepperRot_step 2
+#define stepperRot_dir 2
+#define stepperRot_step 3
 
 // Z-Axis Stepper (Vertical Stepper) Driver Pins
-#define stepperZ_dir 5
-#define stepperZ_step 4
+#define stepperZ_dir 4
+#define stepperZ_step 5
 
   /*--- Pin Mode ---*/
   pinMode(IR_SHARP, INPUT);
@@ -101,24 +104,26 @@ void setup()
   SD.begin(SD_ChipSelect);
 
   /*-- Calculating Variables --*/
-  RADIANS = (3.141592 / 180.0) * (360 / steps_per_rotation_for_motor); // 1.8 degrees
+  RADIANS = (3.141592 / 180.0) * (360 / steps_per_rotation_for_motor); // 0.05625 degress
   steps_z_height = (z_layer_height * steps_per_rotation_for_motor * lead_screw_rotations_per_cm) / 10;
 }
 
 void loop()
 {
 
+  /*Enable for push button*/
   /*if button is pushed, start scanning*/
+  /*
   if (digitalRead(pushButton))
   {
     isScanning = !isScanning; // toggle flag
     delay(3000);              // give time for pushButton to be unpressed
   }
-
+  */
   if (isScanning == 1)
   {
     // Unless we reach the maximum height of the project, keep running the 2 stepper loops
-    if (z < z_axis_height)
+    if (z < z_axis_max_height)
     {
 
       /* Rotating Stepper Loop: Performs 1  */
@@ -126,7 +131,7 @@ void loop()
       {
         getCoordXY();
 
-        digitalWrite(stepperRot_dir, LOW);   // turntable spin to right
+        digitalWrite(stepperRot_dir, HIGH);   // turntable spin to counter clockwise
         digitalWrite(stepperRot_step, HIGH); // make a step
         delayMicroseconds(step_delay);
         digitalWrite(stepperRot_step, LOW);
@@ -134,7 +139,7 @@ void loop()
 
         angle = angle + RADIANS; // Increase the angle by one more unit
 
-        write_to_SD(x, y, z); // Write x, y, z files to SD card function
+        //write_to_SD(x, y, z); // Write x, y, z files to SD card function
 
         // Uncomment this for Serial debug
         /*
@@ -155,7 +160,7 @@ void loop()
       while (z_loop < steps_z_height)
       {
 
-        digitalWrite(stepperZ_dir, LOW);   // z_azis spin to right
+        digitalWrite(stepperZ_dir, HIGH);   // z_azis spin Clockwise
         digitalWrite(stepperZ_step, HIGH); // z_azis make a step
         delayMicroseconds(step_delay);
         digitalWrite(stepperZ_step, LOW);
@@ -164,6 +169,7 @@ void loop()
       }
 
       z = z + z_layer_height; // Increase the made z-height by 1 unit
+      currentSteps_Z = currentSteps_Z + steps_z_height;
       z_loop = 0;             // Reset the z-axis rotation variable
 
     } // end of if z_height
@@ -172,6 +178,15 @@ void loop()
     else
     {
       /*go to home position*/
+      while(currentSteps_Z>0)
+      {
+      digitalWrite(stepperZ_dir, LOW);   // z_azis spin counter Clockwise
+      digitalWrite(stepperZ_step, HIGH); // z_azis make a step
+      delayMicroseconds(step_delay);
+      digitalWrite(stepperZ_step, LOW);
+      delayMicroseconds(step_delay);
+      currentSteps_Z-- ; // decrease the loop by 1
+      }
     }
   }
 }
@@ -182,7 +197,7 @@ double getCoordXY()
   for (int scanCount = 0; scanCount < IR_scans_number; scanCount++)
   {
     measured_analog = analogRead(A0);
-    delay(2);
+    //delay(2);
     analog = analog + measured_analog;
   }
   distance = analog / IR_scans_number; // Get the mean. Divide the scan by the amount of scans.

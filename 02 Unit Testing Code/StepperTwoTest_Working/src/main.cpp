@@ -39,7 +39,7 @@ void setup()
   lcd.init(); // initialize the lcd
   lcd.backlight();
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
 }
 void loop()
@@ -47,33 +47,39 @@ void loop()
   
 
   // Set motor direction clockwise
+  /*Turn Table Stepper*/
   digitalWrite(dirPin1, HIGH);
-  digitalWrite(dirPin2, HIGH);
+  /*Z-Axis Stepper*/
+  digitalWrite(dirPin2, LOW);
 
  
   // Spin motor slowly
+  /*
   for(int x = 0; x < 6400; x++)
   { 
     Serial.print("RotStep Number: ");
     Serial.println(x);
 
     digitalWrite(stepPin1, HIGH);
-    delayMicroseconds(3000);
+    delayMicroseconds(47);
     digitalWrite(stepPin1, LOW);
-    delayMicroseconds(3000);
-
+    delayMicroseconds(47);
 
   }
-    for(int y = 0; y <1; y++)
+  */
+  
+    for(int y = 0; y <6400; y++)
   { 
     Serial.print("Z-AxisStep Number: ");
     Serial.println(y);
-    digitalWrite(stepPin1, HIGH);
-    delayMicroseconds(3000);
-    digitalWrite(stepPin1, LOW);
-    delayMicroseconds(3000);
+    digitalWrite(stepPin2, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(stepPin2, LOW);
+    delayMicroseconds(5);
  
   }
+
+  
 
   
 }
