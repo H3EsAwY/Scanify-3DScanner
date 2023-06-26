@@ -30,7 +30,7 @@ String SD_fileName = "scan_001.txt"; // Name of the saved file on the SD card
 /*---------------- Calibration and Tweaks ----------------*/
 
 /*-- Scan Resolution --*/
-int IR_scans_number = 15;   // Amount of scans for each point. The mean is then calculated. This would increase the delay for each scan, but increase accuracy.
+int IR_scans_number = 45;   // Amount of scans for each point. The mean is then calculated. This would increase the delay for each scan, but increase accuracy.
 float z_layer_height = 0.5; // in mm           //Layer height. The amount of mm for each layer.
 /*-- Stepper Motor Parameters --*/
 int step_delay = 47 ;                  // in us                //Delay for each step for the stepper motor in microseconds
@@ -139,7 +139,7 @@ void loop()
 
         angle = angle + RADIANS; // Increase the angle by one more unit
 
-        //write_to_SD(x, y, z); // Write x, y, z files to SD card function
+        write_to_SD(x, y, z); // Write x, y, z files to SD card function
 
         // Uncomment this for Serial debug
         /*
